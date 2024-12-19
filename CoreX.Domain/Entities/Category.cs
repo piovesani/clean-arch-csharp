@@ -1,41 +1,58 @@
-﻿using System.Xml.Linq;
+﻿using CoreX.Domain.Entities;
 using CoreX.Domain.Validation;
 
-namespace CoreX.Domain.Entities
+public sealed class Category : Base
 {
-    public sealed class Category : Base
+    private readonly List<Product> _products = new();
+
+    public string? Name { get; private set; }
+    public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
+
+    public Category(string name)
     {
-        public string? Name { get; private set; }
+        ValidateName(name);
+        Name = name;
+    }
 
-        public Category(string name)
+    public Category(int id, string name) : this(name)
+    {
+        DomainExceptionValidation.When(
+            id < 0, "Id não pode ser negativo.");
+        Id = id;
+    }
+
+    public void UpdateName(string name)
+    {
+        ValidateName(name);
+        Name = name;
+    }
+
+    public void AddProduct(Product product)
+    {
+        DomainExceptionValidation.When(
+            product == null, "Produto não pode ser nulo.");
+
+        if (product != null)
         {
-            ValidateDomain(name);
+            _products.Add(product);
         }
-        public Category(int id, string name)
-        {
-            DomainExceptionValidation.When(id < 0, "Valor inválido de id");
-            Id = id;
-            ValidateDomain(name);
-        }
+    }
 
-        public void UpdateName(string name)
-        {
-            ValidateDomain(name);
-        }
-        public ICollection<Product>? Products { get; private set; }
+    private void ValidateName(string name)
+    {
+        DomainExceptionValidation.When(
+            string.IsNullOrWhiteSpace(name),
+            "Nome não pode ser vazio ou nulo."
+            );
 
-        private void ValidateDomain(string name)
-        {
-            DomainExceptionValidation.When(string.IsNullOrEmpty(name),
-                "Nome inválido, Nome deve ser preenchido!!");
+        DomainExceptionValidation.When(
+            name.Length < 3,
+            "Nome deve ter no mínimo 3 caracteres."
+            );
 
-            DomainExceptionValidation.When(name.Length < 3,
-                "Nome inválido, Nome deve ter no mínimo 3 caracteres!!");
-
-            DomainExceptionValidation.When(name.Length > 50,
-                "Nome inválido, Nome não deve passar de 50 caracteres!!");
-
-            Name = name;
-        }
+        DomainExceptionValidation.When(
+            name.Length > 50,
+            "Nome não pode exceder 50 caracteres."
+            );
     }
 }
