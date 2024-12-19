@@ -6,7 +6,8 @@ public sealed class Category : Base
     private readonly List<Product> _products = new();
 
     public string? Name { get; private set; }
-    public IReadOnlyCollection<Product> Products => _products.AsReadOnly();
+    public IReadOnlyCollection<Product> Products => 
+        _products.AsReadOnly();
 
     public Category(string name)
     {
